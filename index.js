@@ -18,15 +18,68 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
-
-// your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+// listen for requests :)
+const port = process.env.PORT || 3000;
+app.listen(port, function () {
+  console.log('Your app is listening on port ' + port)
 });
 
 
 
-// listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+
+
+app.get("/api/:date?", (req, res) => {
+
+  console.log(req.params);
+
+  let unix = 0;
+  let utc = "";
+  let date;
+
+  if (typeof req.params.date == "undefined") {
+
+    date = new Date();
+    console.log("returning: ", {
+      unix: Date.now(),
+      utc: date.toUTCString()
+    });
+    return res.json({
+      unix: Date.now(),
+      utc: date.toUTCString()
+    });
+  } else {
+    
+    date = new Date(req.params.date);
+  
+    if (date instanceof Date && !isNaN(date)) {
+      // valid date
+  
+      console.log("returning: ", {
+        unix: date.getTime(),
+        utc: date.toUTCString()
+      });
+      return res.json({
+        unix: date.getTime(),
+        utc: date.toUTCString()
+      });
+    } else {
+      unix = parseInt(req.params.date);
+      date = new Date(unix);
+      if (date instanceof Date && !isNaN(date)) {
+        // valid date (unix)
+
+        console.log("returning: ", {
+          unix: unix,
+          utc: date.toUTCString()
+        });
+        return res.json({
+          unix: unix,
+          utc: date.toUTCString()
+        });
+      } else {
+        console.log("not a valid date");
+        res.json({error: "Invalid Date"})
+      }
+    }
+  }
 });
